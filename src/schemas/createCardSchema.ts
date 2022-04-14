@@ -10,3 +10,4 @@ const cardSchema = joi.object({
     "health"
   ),
 });
+export default cardSchema;
