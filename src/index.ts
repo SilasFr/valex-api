@@ -10,4 +10,6 @@ app.use(json());
 app.use(router);
 app.use(errorHandler);
 
-app.listen(5000, () => console.log("running on 5000"));
+app.listen(5000, () => {
+  console.log("running on 5000");
+});

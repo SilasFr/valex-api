@@ -1,6 +1,10 @@
 import * as companyRepo from "../repositories/companyRepository.js";
 import * as employeeRepo from "../repositories/employeeRepository.js";
 import * as cardRepo from "../repositories/cardRepository.js";
+import * as errorUtils from "../utils/errorUtils.js";
+import { faker } from "@faker-js/faker";
+import dayjs from "dayjs";
+import bcrypt from "bcrypt";
 
 export async function createCard(
   employeeId: number,
@@ -9,18 +13,12 @@ export async function createCard(
 ) {
   const company = await companyRepo.findByApiKey(apiKey);
   if (!company) {
-    throw {
-      type: "not_found",
-      message: "The company api-key is not registered or does not exist",
-    };
+    throw errorUtils.notFoundError("companynot found");
   }
 
   const employee = await employeeRepo.findById(employeeId);
   if (!employee) {
-    throw {
-      type: "not_found",
-      message: "The employee id is not registered or does not exist",
-    };
+    throw errorUtils.notFoundError("employee found");
   }
 
   const validateCardTypeByEmployee = await cardRepo.findByTypeAndEmployeeId(
@@ -29,32 +27,29 @@ export async function createCard(
   );
 
   if (validateCardTypeByEmployee) {
-    throw {
-      type: "forbiden",
-      message: "Cannot register the same Transaction Type twice per employee",
-    };
+    throw errorUtils.forbidenError(
+      "Cannot register the same Transaction Type twice"
+    );
   }
 
-  const creditCardBrand = "Mastercard";
   let cardholderName = [];
-  employee.fullName.split(" ").map((word: string, i) => {
-    if (i === 0 || i === employee.fullName.length - 1) {
-      cardholderName.push(word);
-    } else {
-      cardholderName.push(word[0]);
+  let fullName = employee.fullName.split(" ");
+  fullName.map((word: string, i) => {
+    if (i === 0 || word === fullName[fullName.length - 1]) {
+      return cardholderName.push(word);
+    } else if (word.length > 2) {
+      return cardholderName.push(word[0]);
     }
   });
 
-  //   const newCard: cardRepo.CardInsertData = {
-  //     employeeId,
-  //     number,
-  //     cardholderName: cardholderName.join(' ').toUpperCase(),
-  //     securityCode,
-  //     expirationDate: ,
-  //     password,
-  //     isVirtual,
-  //     originalCardId,
-  //     isBlocked: true,
-  //     type: cardType,
-  //   };
+  const newCard: cardRepo.CardInsertData = {
+    employeeId,
+    number: faker.finance.creditCardNumber("Mastercard"),
+    cardholderName: cardholderName.join(" ").toUpperCase(),
+    securityCode: bcrypt.hashSync(faker.finance.creditCardCVV(), 10),
+    expirationDate: dayjs(Date.now()).add(5, "year").format("MM/YY"),
+    isVirtual: false,
+    isBlocked: true,
+    type: cardType,
+  };
 }
