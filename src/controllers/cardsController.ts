@@ -6,7 +6,7 @@ export async function createNewCard(
   next: NextFunction
 ) {
   const card = res.locals.verified;
-  console.log("card: ", card);
+  const apiKey = req.headers["x-api-key"];
 
   res.sendStatus(201);
 }
