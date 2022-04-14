@@ -48,8 +48,13 @@ export async function createCard(
     cardholderName: cardholderName.join(" ").toUpperCase(),
     securityCode: bcrypt.hashSync(faker.finance.creditCardCVV(), 10),
     expirationDate: dayjs(Date.now()).add(5, "year").format("MM/YY"),
+    password: null,
     isVirtual: false,
+    originalCardId: null,
     isBlocked: true,
     type: cardType,
   };
+
+  await cardRepo.insert(newCard);
+  return;
 }
