@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import cardsRouter from "../routers/cardsRouter.js";
 import * as cardService from "../services/cardsServices.js";
 
 export async function createNewCard(
@@ -10,7 +11,7 @@ export async function createNewCard(
 
   const apiKey = req.headers["x-api-key"].toString();
 
-  const createCard = cardService.createCard(employeeId, type, apiKey);
+  cardService.createCard(employeeId, type, apiKey);
 
   res.sendStatus(201);
 }
@@ -21,9 +22,10 @@ export async function activateCard(
   next: NextFunction
 ) {
   const { id } = req.params;
-  console.log(id);
-  const cardData = req.body;
-  console.log(cardData);
+  const cardData = res.locals.verified;
+  cardData.id = id;
+
+  cardService.activateCard(cardData);
 
   res.sendStatus(200);
 }

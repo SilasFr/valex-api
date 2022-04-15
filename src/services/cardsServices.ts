@@ -32,15 +32,7 @@ export async function createCard(
     );
   }
 
-  let cardholderName = [];
-  let fullName = employee.fullName.split(" ");
-  fullName.map((word: string, i) => {
-    if (i === 0 || word === fullName[fullName.length - 1]) {
-      return cardholderName.push(word);
-    } else if (word.length > 2) {
-      return cardholderName.push(word[0]);
-    }
-  });
+  let cardholderName = await genCardName(employee);
 
   const newCard: cardRepo.CardInsertData = {
     employeeId,
@@ -56,5 +48,68 @@ export async function createCard(
   };
 
   await cardRepo.insert(newCard);
+  return;
+}
+
+function genCardName(employee: any) {
+  let cardholderName = [];
+  let fullName = employee.fullName.split(" ");
+  fullName.map((word: string, i) => {
+    if (i === 0 || word === fullName[fullName.length - 1]) {
+      return cardholderName.push(word);
+    } else if (word.length > 2) {
+      return cardholderName.push(word[0]);
+    }
+  });
+  return cardholderName;
+}
+
+export async function activateCard(cardData: any) {
+  const { id, securityCode, password } = cardData;
+
+  const registeredCard: cardRepo.Card = await cardRepo.findById(id);
+  if (!registeredCard) {
+    throw errorUtils.notFoundError("Card id not found");
+  }
+
+  verifyEpirationDate(registeredCard.expirationDate);
+
+  if (registeredCard.password) {
+    throw errorUtils.forbidenError("Card has already been activated");
+  }
+
+  verifySecurityCode(securityCode, registeredCard);
+
+  await updatePassword(password, id);
+}
+
+async function updatePassword(password: string, id: number) {
+  if (!(password.length === 4)) {
+    throw errorUtils.forbidenError("Password must have 4 digits");
+  }
+
+  const encriptedPassword = bcrypt.hashSync(password, 10);
+  await cardRepo.update(id, { password: encriptedPassword });
+  return;
+}
+
+function verifySecurityCode(securityCode: any, registeredCard: cardRepo.Card) {
+  const securityCodeIsValid = bcrypt.compareSync(
+    securityCode,
+    registeredCard.securityCode
+  );
+  if (!securityCodeIsValid) {
+    throw errorUtils.forbidenError("Invalid CVC (Security code)");
+  }
+  return;
+}
+
+function verifyEpirationDate(date: string) {
+  const date1 = dayjs(date);
+  const date2 = dayjs(Date.now());
+
+  if (date1.diff(date2) < 0) {
+    throw errorUtils.forbidenError("Card has already expired");
+  }
   return;
 }
