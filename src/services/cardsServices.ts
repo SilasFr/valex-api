@@ -69,39 +69,27 @@ export async function activateCard(cardData: any) {
 
   const registeredCard: cardRepo.Card = await cardRepo.findById(id);
   if (!registeredCard) {
-    console.log("eee");
-
     throw errorUtils.notFoundError("Card id not found");
   }
 
-  verifyEpirationDate(registeredCard.expirationDate).catch((error) => {
-    console.log(error);
-  });
+  verifyEpirationDate(registeredCard.expirationDate);
 
   if (registeredCard.password) {
     throw errorUtils.forbidenError("Card has already been activated");
   }
 
-  verifySecurityCode(securityCode, registeredCard).catch((error) => {
-    console.log(error);
-  });
+  verifySecurityCode(securityCode, registeredCard);
 
-  await updatePassword(password, id).catch((error) => {
-    console.log(error);
-  });
+  await updatePassword(password, id);
 }
 
 async function updatePassword(password: string, id: number) {
   if (!(password.length === 4)) {
-    console.log("ccc");
-
     throw errorUtils.forbidenError("Password must have 4 digits");
   }
 
   const encriptedPassword = bcrypt.hashSync(password, 10);
-  await cardRepo
-    .update(id, { password: encriptedPassword, isBlocked: false })
-    .catch((error) => console.log(error));
+  await cardRepo.update(id, { password: encriptedPassword, isBlocked: false });
   return;
 }
 
@@ -114,7 +102,6 @@ async function verifySecurityCode(
     registeredCard.securityCode
   );
   if (!securityCodeIsValid) {
-    console.log("aaa");
     throw errorUtils.forbidenError("Invalid CVC (Security code)");
   }
   return;
@@ -125,8 +112,6 @@ async function verifyEpirationDate(date: string) {
   const date2 = dayjs(Date.now());
 
   if (date1.diff(date2, "month") > 0) {
-    console.log("bbb");
-
     throw errorUtils.forbidenError("Card has already expired");
   }
 }
