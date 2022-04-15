@@ -25,7 +25,7 @@ export async function activateCard(
   const cardData = res.locals.verified;
   cardData.id = id;
 
-  cardService.activateCard(cardData);
+  await cardService.activateCard(cardData);
 
   res.sendStatus(200);
 }

@@ -69,47 +69,64 @@ export async function activateCard(cardData: any) {
 
   const registeredCard: cardRepo.Card = await cardRepo.findById(id);
   if (!registeredCard) {
+    console.log("eee");
+
     throw errorUtils.notFoundError("Card id not found");
   }
 
-  verifyEpirationDate(registeredCard.expirationDate);
+  verifyEpirationDate(registeredCard.expirationDate).catch((error) => {
+    console.log(error);
+  });
 
   if (registeredCard.password) {
     throw errorUtils.forbidenError("Card has already been activated");
   }
 
-  verifySecurityCode(securityCode, registeredCard);
+  verifySecurityCode(securityCode, registeredCard).catch((error) => {
+    console.log(error);
+  });
 
-  await updatePassword(password, id);
+  await updatePassword(password, id).catch((error) => {
+    console.log(error);
+  });
 }
 
 async function updatePassword(password: string, id: number) {
   if (!(password.length === 4)) {
+    console.log("ccc");
+
     throw errorUtils.forbidenError("Password must have 4 digits");
   }
 
   const encriptedPassword = bcrypt.hashSync(password, 10);
-  await cardRepo.update(id, { password: encriptedPassword });
+  await cardRepo
+    .update(id, { password: encriptedPassword, isBlocked: false })
+    .catch((error) => console.log(error));
   return;
 }
 
-function verifySecurityCode(securityCode: any, registeredCard: cardRepo.Card) {
+async function verifySecurityCode(
+  securityCode: any,
+  registeredCard: cardRepo.Card
+) {
   const securityCodeIsValid = bcrypt.compareSync(
     securityCode,
     registeredCard.securityCode
   );
   if (!securityCodeIsValid) {
+    console.log("aaa");
     throw errorUtils.forbidenError("Invalid CVC (Security code)");
   }
   return;
 }
 
-function verifyEpirationDate(date: string) {
+async function verifyEpirationDate(date: string) {
   const date1 = dayjs(date);
   const date2 = dayjs(Date.now());
 
-  if (date1.diff(date2) < 0) {
+  if (date1.diff(date2, "month") > 0) {
+    console.log("bbb");
+
     throw errorUtils.forbidenError("Card has already expired");
   }
-  return;
 }
