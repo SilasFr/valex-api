@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import * as cardService from "../services/cardsServices.js";
-import * as errorUtils from "../utils/errorUtils.js";
 
 export async function createNewCard(
   req: Request,
@@ -28,4 +27,15 @@ export async function activateCard(
   await cardService.activateCard(cardData);
 
   res.sendStatus(200);
+}
+
+export async function getExtract(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { id: cardId } = req.params;
+  const extract = await cardService.getExtract(Number(cardId));
+
+  res.status(200).send(extract);
 }

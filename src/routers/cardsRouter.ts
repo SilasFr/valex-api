@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { activateCard, createNewCard } from "../controllers/cardsController.js";
+import {
+  activateCard,
+  createNewCard,
+  getExtract,
+} from "../controllers/cardsController.js";
 import { validateSchema } from "../middlewares/validateSchema.js";
 import { cardSchema, activateCardSchema } from "../schemas/cardSchemas.js";
 
@@ -11,4 +15,5 @@ cardsRouter.post(
   validateSchema(activateCardSchema),
   activateCard
 );
+cardsRouter.get("/cards/:id/extract", getExtract);
 export default cardsRouter;

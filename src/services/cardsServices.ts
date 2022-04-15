@@ -1,6 +1,8 @@
 import * as companyRepo from "../repositories/companyRepository.js";
 import * as employeeRepo from "../repositories/employeeRepository.js";
 import * as cardRepo from "../repositories/cardRepository.js";
+import * as paymentRepo from "../repositories/paymentRepository.js";
+import * as rechargeRepo from "../repositories/rechargeRepository.js";
 import * as errorUtils from "../utils/errorUtils.js";
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
@@ -114,4 +116,29 @@ async function verifyEpirationDate(date: string) {
   if (date1.diff(date2, "month") > 0) {
     throw errorUtils.forbidenError("Card has already expired");
   }
+}
+
+export async function getExtract(cardId: number) {
+  const card: cardRepo.Card = await cardRepo.findById(cardId);
+  if (!card) {
+    throw errorUtils.notFoundError("Card not found");
+  }
+
+  const recharges: rechargeRepo.Recharge[] = await rechargeRepo.findByCardId(
+    cardId
+  );
+  const totalRechargeAmount: number = recharges
+    .map((row) => row.amount)
+    .reduce((sum, current) => sum + current, 0);
+
+  const transactions: paymentRepo.Payment[] = await paymentRepo.findByCardId(
+    cardId
+  );
+  const totalTransactionsAmount: number = transactions
+    .map((row) => row.amount)
+    .reduce((sum, current) => sum + current, 0);
+
+  const balance = totalRechargeAmount - totalTransactionsAmount;
+
+  return { balance, transactions, recharges };
 }
