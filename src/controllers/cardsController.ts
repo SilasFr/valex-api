@@ -8,9 +8,9 @@ export async function createNewCard(
 ) {
   const { employeeId, type } = res.locals.verified;
 
-  const apiKey = req.headers["x-api-key"].toString();
+  const apiKey = req.headers["x-api-key"]?.toString();
 
-  const cardInfo = cardService.createCard(employeeId, type, apiKey);
+  const cardInfo = await cardService.createCard(employeeId, type, apiKey);
 
   res.status(201).send(cardInfo);
 }

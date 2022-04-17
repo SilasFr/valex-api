@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-// import * as rechargeRepo from "../services/rechargeServices.js";
 
 export async function rechargeCard(
   req: Request,
@@ -7,4 +6,6 @@ export async function rechargeCard(
   next: NextFunction
 ) {
   const { id } = req.params;
+  const amount = res.locals.verified;
+  res.status(200).send("ok");
 }

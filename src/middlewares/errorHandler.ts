@@ -14,6 +14,10 @@ export function errorHandler(
   if (error.type === "not_found") {
     return res.status(404).send(error.message);
   }
-  console.log(error);
+
+  if (error.type === "forbiden") {
+    return res.status(409).send(error.message);
+  }
+  // console.log(error);
   res.status(500).send(error);
 }
