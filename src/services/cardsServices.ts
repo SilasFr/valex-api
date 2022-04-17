@@ -34,14 +34,19 @@ export async function createCard(
     );
   }
 
-  let cardholderName = await genCardName(employee);
+  const cardholderName: string = genCardName(employee);
+  const number: string = faker.finance.creditCardNumber("Mastercard");
+  const securityCode: string = faker.finance.creditCardCVV();
+  const expirationDate: string = dayjs(Date.now())
+    .add(5, "year")
+    .format("MM/YY");
 
   const newCard: cardRepo.CardInsertData = {
     employeeId,
-    number: faker.finance.creditCardNumber("Mastercard"),
-    cardholderName: cardholderName.join(" ").toUpperCase(),
-    securityCode: bcrypt.hashSync(faker.finance.creditCardCVV(), 10),
-    expirationDate: dayjs(Date.now()).add(5, "year").format("MM/YY"),
+    number,
+    cardholderName,
+    securityCode: bcrypt.hashSync(securityCode, 10),
+    expirationDate,
     password: null,
     isVirtual: false,
     originalCardId: null,
@@ -50,7 +55,7 @@ export async function createCard(
   };
 
   await cardRepo.insert(newCard);
-  return;
+  return { cardholderName, number, securityCode, expirationDate };
 }
 
 function genCardName(employee: any) {
@@ -63,7 +68,7 @@ function genCardName(employee: any) {
       return cardholderName.push(word[0]);
     }
   });
-  return cardholderName;
+  return cardholderName.join(" ").toUpperCase();
 }
 
 export async function activateCard(cardData: any) {

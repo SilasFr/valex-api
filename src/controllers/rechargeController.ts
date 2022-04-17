@@ -6,5 +6,5 @@ export async function rechargeCard(
   res: Response,
   next: NextFunction
 ) {
-  const apiKey = req.header["x-api-key"].toString();
+  const { id } = req.params;
 }
