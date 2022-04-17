@@ -4,6 +4,6 @@ import * as errorUtils from "../utils/errorUtils.js";
 export async function validate(apiKey: string) {
   const validation = companyRepo.findByApiKey(apiKey);
   if (!validation) {
-    throw errorUtils.authError("API key doesnt belong to any company");
+    throw errorUtils.authError("API key doesn't belong to any company");
   }
 }

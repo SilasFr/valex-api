@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as errorUtils from "../utils/errorUtils.js";
+import * as apiKeyService from "../services/apiKeyServices";
 
 export async function validateApiKey(
   req: Request,
@@ -10,6 +11,7 @@ export async function validateApiKey(
   if (!apiKey) {
     throw errorUtils.forbidenError("Api key header is needed");
   }
+  await apiKeyService.validate(apiKey);
 
   next();
 }
