@@ -15,5 +15,5 @@ export async function rechargeCard(
 
   await rechargeServices.recharge(parseInt(id), amount);
 
-  res.status(200).send("ok");
+  res.sendStatus(200);
 }
