@@ -114,11 +114,11 @@ async function verifySecurityCode(
   return;
 }
 
-async function verifyEpirationDate(date: string) {
+export async function verifyEpirationDate(date: string) {
   const date1 = dayjs(date);
-  const date2 = dayjs(Date.now());
+  const date2 = dayjs(Date.now()).format("MM/YY");
 
-  if (date1.diff(date2, "month") > 0) {
+  if (date1.diff(date2, "month") < 0) {
     throw errorUtils.forbidenError("Card has already expired");
   }
 }
