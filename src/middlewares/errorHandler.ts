@@ -18,6 +18,5 @@ export function errorHandler(
   if (error.type === "forbiden") {
     return res.status(409).send(error.message);
   }
-  // console.log(error);
   res.status(500).send(error);
 }

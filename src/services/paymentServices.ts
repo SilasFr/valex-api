@@ -1,8 +1,8 @@
 import * as cardRepo from "../repositories/cardRepository.js";
 import * as paymentRepo from "../repositories/paymentRepository.js";
-import * as businessesRepo from "../repositories/businessRepository";
+import * as businessesRepo from "../repositories/businessRepository.js";
 import * as errorUtils from "../utils/errorUtils.js";
-import { getExtract, verifyEpirationDate } from "./cardsServices";
+import { getExtract, verifyEpirationDate } from "./cardsServices.js";
 import bcrypt from "bcrypt";
 
 export async function buy(
@@ -13,9 +13,9 @@ export async function buy(
 ) {
   const card: cardRepo.Card = await verifyCard(cardId);
 
-  verifyEpirationDate(card.expirationDate);
+  await verifyEpirationDate(card.expirationDate);
 
-  verifyCardPassword(password, card);
+  await verifyCardPassword(password, card);
 
   await verifyBusiness(businessId, card);
 
@@ -34,9 +34,9 @@ async function verifyCardBalance(cardId: number, amount: number) {
   }
 }
 
-function verifyCardPassword(password: string, card: cardRepo.Card) {
-  const passwordIsValid = bcrypt.compareSync(password, card.password);
-  if (passwordIsValid) {
+async function verifyCardPassword(password: string, card: cardRepo.Card) {
+  const passwordIsValid: boolean = bcrypt.compareSync(password, card.password);
+  if (!passwordIsValid) {
     throw errorUtils.forbidenError("Invalid password");
   }
 }
